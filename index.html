@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Search Movie, TV Show</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
+     <!-- add icon link -->
+     <link rel = "icon" href = "https://m.media-amazon.com/images/G/01/imdb/images/favicon-2165806970._CB470047330_.ico" type = "image/x-icon"> 
+</head>
+
+<body>
+    <div id="container" class="container theme-black">
+        <br>
+        <button class="btn btn-success pull-right" onclick="changeTheme();">Change Theme</button>
+        <div class="jumbotronCust text-center">
+            <h1>MovieURL</h1>
+            <p>Search for any Movie, TV Shows .....</p>
+            <form class="form-inline" name="searchTextForm" onsubmit="searchMovies(); return false;">
+                <div class="input-group">
+                    <input type="text" id="searchText" class="form-control" size="50"
+                        placeholder="Search Movie, TV Show ....." required>
+                    <div class="input-group-btn">
+                        <button type="submit" class="btn btn-primary">Search</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div id='rslt' class="row">
+        </div>
+    </div>
+</body>
+
+<script>
+    function searchMovies() {
+        //e.preventDefault();
+        let output, len, res;
+        // Set OMDB API key
+        const omdbApiKey = 'a43257v7';
+
+        let srchTxt = document.getElementById('searchText').value;
+        // console.log(`Search Term ${srchTxt}`);
+
+        let xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                // document.getElementById("rslt").innerHTML = JSON.parse(this.responseText);
+                console.log("Response Object: " + JSON.parse(this.responseText));
+                // console.log(JSON.parse(this.responseText).totalResults);
+                // console.log(JSON.parse(this.responseText).Search.length);
+                res = JSON.parse(this.responseText).Response;
+                // console.log("Response " + typeof res);
+                if (res === "True") {
+                    output = '';
+                    len = JSON.parse(this.responseText).Search.length;
+                    for (i = 0; i < len; i++) {
+                        output += `<div class="col-sm-3 movieContainer">
+                                <img src="${JSON.parse(this.responseText).Search[i].Poster}" class="moviePoster">
+                                <h3>${JSON.parse(this.responseText).Search[i].Title}</h3>
+                                <p>${JSON.parse(this.responseText).Search[i].Year}</p>
+                                <div> <a target="_blank" class="btn btn-info" href="https://www.imdb.com/title/${JSON.parse(this.responseText).Search[i].imdbID}">View Details</a></div>
+                               </div>
+                            `;
+                    }
+                    document.getElementById("rslt").innerHTML = output;
+                } else {
+                    document.getElementById("rslt").innerHTML = `
+                                        <h2 class="ml-4">${JSON.parse(this.responseText).Error}</h2>
+                                        `;
+                }
+            } else if (this.status == 401){
+                //console.log("API Response Status" + this.status);
+                document.getElementById("rslt").innerHTML = `
+                                        <h2 class="ml-4">Invalid API Key (Unauthorized)</h2>
+                                        `;
+            }
+        };
+        xhttp.open("GET", `http://www.omdbapi.com/?s=${srchTxt}&apikey=${omdbApiKey}`, true);
+        xhttp.send();
+
+    }
+
+    function changeTheme() {
+        let container = document.getElementById('container');
+        container.classList.toggle("theme-white");
+    }
+</script>
+
+</html>
